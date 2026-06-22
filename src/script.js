@@ -21,43 +21,46 @@
   }
 
   /* ============================================================
-     CUSTOM CURSOR
+     CUSTOM CURSOR (desktop only)
      ============================================================ */
-  const cursor = document.createElement('div');
-  cursor.className = 'custom-cursor';
-  const follower = document.createElement('div');
-  follower.className = 'cursor-follower';
-  document.documentElement.appendChild(cursor);
-  document.documentElement.appendChild(follower);
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if (hasFinePointer) {
+    const cursor = document.createElement('div');
+    cursor.className = 'custom-cursor';
+    const follower = document.createElement('div');
+    follower.className = 'cursor-follower';
+    document.documentElement.appendChild(cursor);
+    document.documentElement.appendChild(follower);
 
-  let mouseX = -100, mouseY = -100;
-  let followX = -100, followY = -100;
+    let mouseX = -100, mouseY = -100;
+    let followX = -100, followY = -100;
 
-  function moveCursor(e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top = mouseY + 'px';
+    function moveCursor(e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursor.style.left = mouseX + 'px';
+      cursor.style.top = mouseY + 'px';
+    }
+
+    document.addEventListener('mousemove', moveCursor);
+
+    function animateCursor() {
+      followX += (mouseX - followX) * 0.1;
+      followY += (mouseY - followY) * 0.1;
+      follower.style.left = followX + 'px';
+      follower.style.top = followY + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    document.querySelectorAll('a, button, .card, .gallery-grid img, .experiencia-item').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.classList.add('cursor-hover'); follower.classList.add('cursor-hover'); });
+      el.addEventListener('mouseleave', () => { cursor.classList.remove('cursor-hover'); follower.classList.remove('cursor-hover'); });
+    });
+
+    document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; follower.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; follower.style.opacity = '1'; });
   }
-
-  document.addEventListener('mousemove', moveCursor);
-
-  function animateCursor() {
-    followX += (mouseX - followX) * 0.1;
-    followY += (mouseY - followY) * 0.1;
-    follower.style.left = followX + 'px';
-    follower.style.top = followY + 'px';
-    requestAnimationFrame(animateCursor);
-  }
-  animateCursor();
-
-  document.querySelectorAll('a, button, .card, .gallery-grid img, .experiencia-item').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursor.classList.add('cursor-hover'); follower.classList.add('cursor-hover'); });
-    el.addEventListener('mouseleave', () => { cursor.classList.remove('cursor-hover'); follower.classList.remove('cursor-hover'); });
-  });
-
-  document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; follower.style.opacity = '0'; });
-  document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; follower.style.opacity = '1'; });
 
   /* ============================================================
      PARTICLES (Hero background)
@@ -72,7 +75,8 @@
 
     const ctx = canvas.getContext('2d');
     const particles = [];
-    const COUNT = 40;
+    const isMobile = window.innerWidth < 768;
+    const COUNT = isMobile ? 10 : 40;
 
     for (let i = 0; i < COUNT; i++) {
       particles.push({
@@ -117,13 +121,14 @@
     }
     drawParticles();
 
+    let resizeTimer;
     window.addEventListener('resize', () => {
-      canvas.width = hero.offsetWidth;
-      canvas.height = hero.offsetHeight;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        canvas.width = hero.offsetWidth;
+        canvas.height = hero.offsetHeight;
+      }, 200);
     });
-
-    const themeObserver = new MutationObserver(() => {});
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   }
 
   /* ============================================================
@@ -134,20 +139,26 @@
     entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.classList.add('visible');
-        e.target.style.transform = 'none';
       }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
   revealElements.forEach(el => scrollObserver.observe(el));
 
-  /* Parallax on hero image */
+  /* Parallax on hero image (throttled) */
   const heroImg = document.querySelector('.hero__visual img');
   if (heroImg) {
+    let parallaxTicking = false;
     window.addEventListener('scroll', () => {
-      const rect = heroImg.getBoundingClientRect();
-      const speed = 0.08;
-      const y = (rect.top - window.innerHeight) * speed;
-      heroImg.style.transform = `translateY(${Math.min(Math.max(y, -40), 40)}px)`;
+      if (!parallaxTicking) {
+        requestAnimationFrame(() => {
+          const rect = heroImg.getBoundingClientRect();
+          const speed = 0.08;
+          const y = (rect.top - window.innerHeight) * speed;
+          heroImg.style.transform = `translateY(${Math.min(Math.max(y, -40), 40)}px)`;
+          parallaxTicking = false;
+        });
+        parallaxTicking = true;
+      }
     });
   }
 
@@ -180,17 +191,24 @@
      ============================================================ */
   const header = document.querySelector('.site-header');
   let lastScroll = 0;
+  let navTicking = false;
   if (header) {
     window.addEventListener('scroll', () => {
-      const current = window.scrollY;
-      if (current > 150) {
-        if (current > lastScroll) header.classList.add('nav-hidden');
-        else header.classList.remove('nav-hidden');
-        header.classList.add('nav-scrolled');
-      } else {
-        header.classList.remove('nav-scrolled', 'nav-hidden');
+      if (!navTicking) {
+        requestAnimationFrame(() => {
+          const current = window.scrollY;
+          if (current > 150) {
+            if (current > lastScroll) header.classList.add('nav-hidden');
+            else header.classList.remove('nav-hidden');
+            header.classList.add('nav-scrolled');
+          } else {
+            header.classList.remove('nav-scrolled', 'nav-hidden');
+          }
+          lastScroll = current;
+          navTicking = false;
+        });
+        navTicking = true;
       }
-      lastScroll = current;
     });
   }
 
@@ -202,7 +220,7 @@
       const rect = btn.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
-      btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+      btn.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
     });
     btn.addEventListener('mouseleave', () => {
       btn.style.transform = 'translate(0, 0)';
@@ -293,12 +311,57 @@
   /* ============================================================
      SMOOTH SCROLL FOR NAV LINKS
      ============================================================ */
-  document.querySelectorAll('.main-nav a[href^="#"]').forEach(anchor => {
+  document.querySelectorAll('.main-nav a[href^="#"], .overlay-nav a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', e => {
       e.preventDefault();
       const target = document.querySelector(anchor.getAttribute('href'));
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
+
+  /* ============================================================
+     HAMBURGER MENU TOGGLE
+     ============================================================ */
+  const hamburger = document.getElementById('hamburger');
+  const navOverlay = document.getElementById('navOverlay');
+
+  if (hamburger && navOverlay) {
+    const overlayLinks = navOverlay.querySelectorAll('a');
+
+    function openMenu() {
+      hamburger.classList.add('active');
+      navOverlay.classList.add('active');
+      hamburger.setAttribute('aria-expanded', 'true');
+      navOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      hamburger.classList.remove('active');
+      navOverlay.classList.remove('active');
+      hamburger.setAttribute('aria-expanded', 'false');
+      navOverlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = navOverlay.classList.contains('active');
+      isOpen ? closeMenu() : openMenu();
+    });
+
+    overlayLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && navOverlay.classList.contains('active')) {
+        closeMenu();
+      }
+    });
+
+    navOverlay.addEventListener('click', e => {
+      if (e.target === navOverlay) closeMenu();
+    });
+  }
 
 })();

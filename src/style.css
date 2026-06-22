@@ -97,6 +97,37 @@ img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 button, a.button { font: inherit; }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::moz-focus-inner { border: 0; }
+
+/* ============================================================
+   SKIP TO CONTENT
+   ============================================================ */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 2147483647;
+  padding: 0.8rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 0 0 0.8rem 0.8rem;
+  transition: top 0.3s ease;
+  font-family: "DM Sans", sans-serif;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: none;
+}
+
 /* ============================================================
    CUSTOM CURSOR — visible on all backgrounds
    ============================================================ */
@@ -330,6 +361,66 @@ button, a.button { font: inherit; }
 }
 
 /* ============================================================
+   HEADER ACTIONS (theme + hamburger)
+   ============================================================ */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   HAMBURGER
+   ============================================================ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: var(--glass-bg);
+  border: 1px solid var(--surface-border);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.35s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+  transform: scale(1.12);
+}
+
+.hamburger-line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ============================================================
    EYEBROW — syncopate uppercase
    ============================================================ */
 .eyebrow {
@@ -510,6 +601,9 @@ button, a.button { font: inherit; }
 
 .button:hover { transform: translateY(-3px) scale(1.02); }
 .button:active { transform: translateY(-1px) scale(0.98); }
+@media (hover: none) {
+  .button:active { transform: scale(0.96); }
+}
 
 .button--primary {
   background: linear-gradient(135deg, var(--accent-dark), var(--accent));
@@ -526,6 +620,8 @@ button, a.button { font: inherit; }
   background: linear-gradient(135deg, #075e54, #128c7e, #25d366);
   color: #fff;
   box-shadow: 0 6px 30px rgba(37, 211, 102, 0.25);
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
 }
 
 .button--whatsapp:hover {
@@ -661,6 +757,13 @@ button, a.button { font: inherit; }
   box-shadow: 0 16px 60px var(--accent-glow);
 }
 
+@media (hover: none) {
+  .card:active {
+    transform: scale(0.97);
+    border-color: var(--accent);
+  }
+}
+
 .card:hover::before { opacity: 1; }
 
 .card-icon {
@@ -734,6 +837,12 @@ button, a.button { font: inherit; }
   filter: saturate(1.05);
 }
 
+@media (hover: none) {
+  .gallery-grid img:active {
+    transform: scale(0.97);
+  }
+}
+
 /* ============================================================
    LIGHTBOX
    ============================================================ */
@@ -797,6 +906,75 @@ button, a.button { font: inherit; }
 
 .lightbox-prev { left: 1.5rem; }
 .lightbox-next { right: 1.5rem; }
+
+/* ============================================================
+   NAV OVERLAY — mobile menu
+   ============================================================ */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.overlay-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.overlay-nav a {
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 500;
+  color: var(--text);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  transition: color 0.3s ease;
+  padding: 0.6rem 2rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+
+.overlay-nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.35s ease;
+  border-radius: 1px;
+}
+
+.overlay-nav a:hover::after,
+.overlay-nav a:active::after,
+.overlay-nav a:focus-visible::after {
+  width: 60%;
+  left: 20%;
+}
+
+.overlay-nav a:hover,
+.overlay-nav a:active {
+  color: var(--accent);
+}
 
 /* ============================================================
    EXPERIENCIA — editorial timeline
@@ -936,6 +1114,8 @@ button, a.button { font: inherit; }
 .social-link--whatsapp {
   background: linear-gradient(135deg, #075e54, #128c7e, #25d366);
   box-shadow: 0 6px 25px rgba(37, 211, 102, 0.25);
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
 }
 
 .social-link--whatsapp:hover {
@@ -946,11 +1126,19 @@ button, a.button { font: inherit; }
 .social-link--instagram {
   background: linear-gradient(135deg, #feda77, #e1306c, #962fbf);
   box-shadow: 0 6px 25px rgba(225, 48, 108, 0.25);
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
 }
 
 .social-link--instagram:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 12px 45px rgba(225, 48, 108, 0.4);
+}
+
+@media (hover: none) {
+  .social-link:active {
+    transform: scale(0.96);
+  }
 }
 
 .contact-map {
@@ -1013,13 +1201,20 @@ button, a.button { font: inherit; }
   .site-header {
     padding: 0.9rem 1.25rem;
     border-radius: 0;
+    flex-wrap: nowrap;
   }
 
   .brand-title { font-size: 1.1rem; }
   .brand-subtitle { font-size: 0.55rem; }
 
-  .main-nav { gap: 1rem; }
-  .main-nav a { font-size: 0.6rem; letter-spacing: 0.06em; }
+  .main-nav { display: none; }
+  .hamburger { display: flex; }
+
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+    font-size: 1.15rem;
+  }
 
   .page-shell { padding: 1rem; }
 
@@ -1035,7 +1230,7 @@ button, a.button { font: inherit; }
   .hero-actions { flex-direction: column; }
   .hero-actions .button { width: 100%; justify-content: center; }
 
-  .button { padding: 0.8rem 1.5rem; font-size: 0.7rem; white-space: normal; }
+  .button { padding: 0.8rem 1.5rem; font-size: 0.75rem; white-space: normal; min-height: 44px; }
 
   .section { padding: 3rem 0; }
 
@@ -1045,16 +1240,16 @@ button, a.button { font: inherit; }
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .gallery-grid img { height: 180px; }
+  .gallery-grid img { height: 200px; }
 
   .contact-grid { margin-top: 2rem; }
   .contact-card { padding: 1.5rem; }
 
   .contact-social { flex-direction: column; }
-  .social-link { width: 100%; justify-content: center; }
+  .social-link { width: 100%; justify-content: center; min-height: 44px; }
 
-  .lightbox-prev, .lightbox-next { display: none; }
-  .lightbox-close { top: 1rem; right: 1rem; width: 44px; height: 44px; font-size: 1.4rem; }
+  .lightbox-prev, .lightbox-next { display: flex; width: 48px; height: 48px; }
+  .lightbox-close { top: 1rem; right: 1rem; width: 48px; height: 48px; font-size: 1.4rem; }
 }
 
 /* ============================================================
@@ -1063,47 +1258,54 @@ button, a.button { font: inherit; }
 @media (max-width: 480px) {
   .site-header {
     padding: 0.7rem 0.9rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .brand-mark { gap: 0.6rem; }
   .logo-image { width: 36px; height: 36px; }
-  .brand-title { font-size: 0.95rem; }
+  .brand-title { font-size: 1rem; }
   .brand-subtitle { display: none; }
-  .main-nav { gap: 0.5rem; }
-  .main-nav a { font-size: 0.55rem; letter-spacing: 0.04em; }
-  .theme-toggle { width: 34px; height: 34px; font-size: 0.9rem; }
+
+  .theme-toggle { width: 44px; height: 44px; font-size: 1.1rem; }
+  .hamburger { width: 44px; height: 44px; }
 
   .page-shell { padding: 0.6rem; }
 
   .hero {
     padding: 2rem 1rem;
-    margin-top: 4.5rem;
+    margin-top: 5rem;
     border-radius: 1.5rem;
   }
 
   .hero h2 { font-size: 1.8rem; }
-  .hero-copy { font-size: 0.82rem; margin: 1rem 0 1.5rem; }
+  .hero-copy { font-size: 0.9rem; margin: 1rem 0 1.5rem; line-height: 1.7; }
   .hero__visual { min-height: 180px; }
 
   .section { padding: 2rem 0; }
   .section-heading h3 { font-size: 1.5rem; }
+  .section-subtitle { font-size: 0.95rem; }
 
   .card { padding: 1.5rem; }
+  .card p { font-size: 0.95rem; }
+
   .experiencia-item { padding: 1.5rem; }
+  .experiencia-item p { font-size: 0.93rem; }
 
   .gallery-grid {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
 
-  .gallery-grid img { height: 120px; border-radius: 1rem; }
+  .gallery-grid img { height: 160px; border-radius: 1rem; }
 
   .contact-card { padding: 1.25rem; }
-  .contact-map { min-height: 180px; }
-  .contact-map iframe { min-height: 180px; }
+  .contact-note { font-size: 0.95rem; }
+  .contact-item p { font-size: 0.95rem; }
+  .social-link { font-size: 0.82rem; min-height: 44px; }
+  .contact-map { min-height: 260px; }
+  .contact-map iframe { min-height: 260px; }
 
-  .site-footer { padding: 1.5rem 0; font-size: 0.65rem; }
+  .site-footer { padding: 1.5rem 0; font-size: 0.72rem; }
 }
 
 /* ============================================================
